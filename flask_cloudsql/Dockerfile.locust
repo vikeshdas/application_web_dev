@@ -1,0 +1,9 @@
+FROM locustio/locust
+
+USER root
+WORKDIR /loat_testing
+
+COPY locustfile.py /loat_testing
+RUN apt-get update && apt-get install -y python3 python3-pip
+RUN pip3 install locust
+USER locust

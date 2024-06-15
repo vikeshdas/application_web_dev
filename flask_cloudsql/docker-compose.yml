@@ -1,0 +1,36 @@
+services:
+  backend_service:
+    image: timbba_flask
+    container_name: backend_service
+    depends_on:
+      - cloudsql_proxy
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./jai-dev-mlconsole-poc-2ec1f3eb567b.json:/jai-dev-mlconsole-poc-2ec1f3eb567b.json"
+      - "./:/timbba_flask"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/jai-dev-mlconsole-poc-2ec1f3eb567b.json 
+
+  cloudsql_proxy:
+    image: cloud-sql-proxy
+    container_name: cloudsql_proxy
+    ports:
+        - "127.0.0.1:3308:3308"  
+    volumes:
+        - "./jai-dev-mlconsole-poc-2ec1f3eb567b.json:/jai-dev-mlconsole-poc-2ec1f3eb567b.json"
+
+
+  master_service:
+    image: locust_image
+    ports:
+     - "8089:8089"
+    volumes:
+      - "./locustfile.py:/loat_testing/locustfile.py"
+    command: -f /loat_testing/locustfile.py --master -H http://master_service:8089
+  
+  worker_service:
+    image: locust_image
+    volumes:
+      - "./locustfile.py:/loat_testing/locustfile.py"
+    command: -f /loat_testing/locustfile.py --worker --master-host master_service
