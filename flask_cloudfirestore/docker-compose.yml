@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  backend_service:
+    image: timbba_flask
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./jai-dev-mlconsole-poc-2ec1f3eb567b.json:/jai-dev-mlconsole-poc-2ec1f3eb567b.json"
+      - "./:/timbba_flask"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/timbba_flask/jai-dev-mlconsole-poc-2ec1f3eb567b.json 
+
+  master_service:
+      image: locust_image
+      ports:
+      - "8089:8089"
+      volumes:
+        - "./performance_testing/locustfile.py:/load_testing/locustfile.py"
+      command: -f /load_testing/locustfile.py --master -H http://master_service:8089
+  worker_service:
+      image: locust_image
+      volumes:
+        - "./performance_testing/locustfile.py:/load_testing/locustfile.py"
+      command: -f /load_testing/locustfile.py --worker --master-host master_service
