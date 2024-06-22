@@ -59,7 +59,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'timbba_db',
-        'HOST': 'cloudsql_proxy',
+        'HOST': 'cloud_sql_proxy',
         'USER': 'root',
         'PASSWORD': 'vikesh@123',
         'PORT': '3307',

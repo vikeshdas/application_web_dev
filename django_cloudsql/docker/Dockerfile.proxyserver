@@ -1,0 +1,3 @@
+FROM gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.1
+
+CMD ["--address=0.0.0.0", "--port=3307", "--credentials-file=/application_default_credentials.json", "gcloud-hands-on-417608:us-central1:vikesh-timbba-db"]

@@ -1,0 +1,30 @@
+services:
+  backend_service:
+    image: timbba_django
+    container_name: backend_service
+    depends_on:
+      - cloud_sql_proxy
+    ports:
+      - "8001:8001"
+
+  cloud_sql_proxy:
+    image: cloud_sql_proxy
+    container_name: cloud_sql_proxy
+    ports:
+        - "127.0.0.1:3307:3307"  
+    volumes:
+      - "C:/Users/vk001/vikesh/application_default_credentials.json:/application_default_credentials.json"
+
+  master_service:
+      image: locust_image
+      ports:
+      - "8089:8089"
+      volumes:
+        - "./locustfile.py:/loat_testing/locustfile.py"
+      command: -f /loat_testing/locustfile.py --master -H http://master_service:8089
+    
+  worker_service:
+    image: locust_image
+    volumes:
+      - "./locustfile.py:/loat_testing/locustfile.py"
+    command: -f /loat_testing/locustfile.py --worker --master-host master_service
