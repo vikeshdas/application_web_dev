@@ -9,31 +9,30 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - "./jai-dev-mlconsole-poc-2ec1f3eb567b.json:/jai-dev-mlconsole-poc-2ec1f3eb567b.json"
+      - "./application_default_credentials.json:/application_default_credentials.json"
       - "./:/timbba_django"
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/timbba_django/jai-dev-mlconsole-poc-2ec1f3eb567b.json 
-    command: ["../configuration/entrypoint.sh"]
+      - GOOGLE_APPLICATION_CREDENTIALS=/timbba_django/application_default_credentials.json 
 
 
   cloudsql_proxy:
-    image: cloud-sql-proxy
+    image: cloud_sql_proxy
     container_name: cloudsql_proxy
     ports:
         - "127.0.0.1:3307:3307"  
     volumes:
-      - "./jai-dev-mlconsole-poc-2ec1f3eb567b.json:/jai-dev-mlconsole-poc-2ec1f3eb567b.json"
+      - "./application_default_credentials.json:/application_default_credentials.json"
 
-  master_service:
-      image: locust_image
-      ports:
-      - "8089:8089"
-      volumes:
-        - "./locustfile.py:/loat_testing/locustfile.py"
-      command: -f /loat_testing/locustfile.py --master -H http://master_service:8089
+  # master_service:
+  #     image: locust_image
+  #     ports:
+  #     - "8089:8089"
+  #     volumes:
+  #       - "./locustfile.py:/loat_testing/locustfile.py"
+  #     command: -f /loat_testing/locustfile.py --master -H http://master_service:8089
     
-  worker_service:
-    image: locust_image
-    volumes:
-      - "./locustfile.py:/loat_testing/locustfile.py"
-    command: -f /loat_testing/locustfile.py --worker --master-host master_service
+  # worker_service:
+  #   image: locust_image
+  #   volumes:
+  #     - "./locustfile.py:/loat_testing/locustfile.py"
+  #   command: -f /loat_testing/locustfile.py --worker --master-host master_service

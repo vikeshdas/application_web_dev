@@ -58,10 +58,10 @@ WSGI_APPLICATION = 'timbba.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'jai-dev-db',
+        'NAME': 'timbba_db',
         'HOST': 'cloudsql_proxy',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'vikesh@123',
         'PORT': '3307',
     }
 }

@@ -9,7 +9,6 @@ wait_for_mysql() {
 
 wait_for_mysql
 
-gunicorn -c gunicorn_config.py timbba.wsgi:application
 python manage.py makemigrations timbba
 python manage.py migrate timbba
 
