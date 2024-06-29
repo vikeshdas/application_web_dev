@@ -7,6 +7,19 @@ from django.core.cache import cache
 from rest_framework.views import APIView
 
 class CustomPagination(PageNumberPagination):
+    """
+        Custom pagination class that extends the PageNumberPagination provided by Django REST Framework.
+        
+        This pagination class initialize some vlues for pagination:
+        - Default page size of 2.
+        - Allows clients to specify the page size via the 'page_size' query parameter.
+        - Restricts the maximum page size that can be requested to 100.
+
+        Attributes:
+            page_size (int): The default number of items to include in each page.
+            page_size_query_param (str): The name of the query parameter that allows clients to set the page size.
+            max_page_size (int): The maximum number of items allowed in each page
+    """
     page_size = 2
     page_size_query_param = 'page_size'
     max_page_size = 100
@@ -95,9 +108,9 @@ class Logs(APIView):
         """
         consignment_id = request.GET.get('con_id')
         cache_key = f'logs_data_{consignment_id}'
-
+         
         cached_data = cache.get(cache_key)
-        if cached_data:
+        if cached_data:                   
             response_data = cached_data
             response_data['message'] = 'Data retrieved from cache'
             return JsonResponse(response_data, status=200)

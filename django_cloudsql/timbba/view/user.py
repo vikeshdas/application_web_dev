@@ -1,5 +1,4 @@
 from timbba.models import Client,Roles
-import json
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
@@ -10,10 +9,24 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+import json
 
 User = get_user_model()
 
 class CustomPagination(PageNumberPagination):
+    """
+        Custom pagination class that extends the PageNumberPagination provided by Django REST Framework.
+        
+        This pagination class initialize some vlues for pagination:
+        - Default page size of 2.
+        - Allows clients to specify the page size via the 'page_size' query parameter.
+        - Restricts the maximum page size that can be requested to 100.
+
+        Attributes:
+            page_size (int): The default number of items to include in each page.
+            page_size_query_param (str): The name of the query parameter that allows clients to set the page size.
+            max_page_size (int): The maximum number of items allowed in each page
+    """
     page_size = 2
     page_size_query_param = 'page_size'
     max_page_size = 100
@@ -61,6 +74,15 @@ class UserView(APIView):
 
    
     def put(self, request):
+        """
+            Creating a new user with unique username and contact number,means saving information of a user in database.
+
+            Args:
+                request:HttpRequest's object contains information of a user to save in database.
+            
+            Returns:
+                JsonResponse : Returns message in JSON format either data saved successfully or failed.
+        """
         data = json.loads(request.body)
         try:
             try:
@@ -73,7 +95,6 @@ class UserView(APIView):
             except Client.DoesNotExist:
                 return JsonResponse({'error': 'Client not found'}, status=404)
         
-        
             user = User.objects.create_user(
                 first_name=data.get('first_name'),
                 last_name=data.get('last_name'),
@@ -84,7 +105,6 @@ class UserView(APIView):
                 client=client,
                 password=data.get('password')
             )
-            
             
             serialized_data = user.user_serializer()
             return JsonResponse({'message': 'User created successfully', 'data': serialized_data}, status=201, safe=False)
@@ -100,7 +120,17 @@ class UserView(APIView):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
         
+
     def get(self, request):
+        """
+            Fetch information of a user from the database, based on user_id.
+
+            Args:
+                request: HttpRequest's object contains id of a user.
+
+            Returns: JsonResponse: returns information of a user in the JSON format.
+        """
+
         user_id = request.GET.get('id')
         cache_key = f'user_data_{user_id}'
 

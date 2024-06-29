@@ -13,9 +13,22 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 class LoginView(APIView):
+    """
+        View class to check a user is authenticated or not.
+    """
     permission_classes = [AllowAny]
 
     def put(self, request):
+        """
+        Check username and passwrid is matching in databsae or not.If user is authenticated it will return 
+        a token.
+
+        Args:
+            HttpRequest :Contains username and password in request body.
+
+        Returns:
+            JsonResponse:return JSON contains referesh token. 
+        """
         try:
             data = json.loads(request.body)
             username = data.get('username')

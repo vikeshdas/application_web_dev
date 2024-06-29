@@ -1,14 +1,26 @@
 from timbba.models import User,Client,Consignment
-from django.views import View 
-import json
 from django.http import JsonResponse
-from rest_framework.permissions import IsAuthenticated
 from django.core.cache import cache
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
+import json
 
 
 class CustomPagination(PageNumberPagination):
+    """
+        Custom pagination class that extends the PageNumberPagination provided by Django REST Framework.
+        
+        This pagination class initialize some vlues for pagination:
+        - Default page size of 2.
+        - Allows clients to specify the page size via the 'page_size' query parameter.
+        - Restricts the maximum page size that can be requested to 100.
+
+        Attributes:
+            page_size (int): The default number of items to include in each page.
+            page_size_query_param (str): The name of the query parameter that allows clients to set the page size.
+            max_page_size (int): The maximum number of items allowed in each page
+    """
     page_size = 2
     page_size_query_param = 'page_size'
     max_page_size = 100
@@ -75,8 +87,6 @@ class ConsignmentView(APIView):
             response_data['message'] = 'Data retrieved from cache'
             return JsonResponse(response_data, status=200)
         
-        # data = json.loads(request.body)
-        # cons_id = data.get('con_id')
         try:
             consignment = Consignment.objects.get(id=cons_id)
         except Consignment.DoesNotExist:
@@ -116,7 +126,7 @@ class Consignments(APIView):
             return JsonResponse(response_data, status=200)
 
         try:
-            client_exist=Client.objects.get(id=client_id)
+            Client.objects.get(id=client_id)
         except Exception as e:
             return JsonResponse({'error': 'Client not found with this id'}, status=404)
 

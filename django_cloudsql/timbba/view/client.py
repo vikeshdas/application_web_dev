@@ -1,9 +1,8 @@
-from timbba.models import Client
-from django.views import View 
-import json
+from timbba.models import Client 
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
 from datetime import datetime
+import json
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 

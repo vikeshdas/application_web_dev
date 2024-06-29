@@ -1,10 +1,9 @@
 from timbba.models import Roles
-from django.views import View 
-import json
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+import json
 
 class RoleView(APIView):
 
