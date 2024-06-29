@@ -1,12 +1,27 @@
-from timbba.models import User,Client,Roles
-from django.views import View 
+from timbba.models import Client,Roles
 import json
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
+from django.core.cache import cache
+from django.db import IntegrityError
+from django.http import JsonResponse
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 
- 
+User = get_user_model()
 
-class UserView(View):
+class CustomPagination(PageNumberPagination):
+    page_size = 2
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class UserView(APIView):
+    permission_classes = [AllowAny]
+
     """
         A View class to handle user related operations like creating a new user,fetching information of a user , 
         updating a user and delete a user.
@@ -44,41 +59,39 @@ class UserView(View):
             return JsonResponse({'error': str(e)}, status=500)
 
 
+   
     def put(self, request):
-        """
-            Creating a new user with unique username and contact number,means saving information of a user in database.
-
-            Args:
-                request:HttpRequest's object contains information of a user to save in database.
-            
-            Returns:
-                JsonResponse : Returns message in JSON format either data saved successfully or failed.
-        """
         data = json.loads(request.body)
-
         try:
-            duplicate_username = User.objects.filter(username=data.get('username'))
-            contact_duplicate= User.objects.filter(contact=data.get('contact'))
-            exist_role=Roles.objects.filter(id=data.get('role_id'))
-            exist_client=Client.objects.filter(id=data.get('client_id'))
+            try:
+                role = Roles.objects.get(id=data.get('role_id'))
+            except Roles.DoesNotExist:
+                return JsonResponse({'error': 'Role not found'}, status=404)
 
-            if not exist_client:
-                return JsonResponse({"error": "Client with this id not exists"}, status=409, safe=False)
+            try:
+                client = Client.objects.get(id=data.get('client_id'))
+            except Client.DoesNotExist:
+                return JsonResponse({'error': 'Client not found'}, status=404)
         
-            if not exist_role:
-                return JsonResponse({"error": "Role with this id not exists"}, status=409, safe=False)
+        
+            user = User.objects.create_user(
+                first_name=data.get('first_name'),
+                last_name=data.get('last_name'),
+                username=data.get('username'),
+                email=data.get('email'),
+                role=role,
+                phone=data.get('phone'),
+                client=client,
+                password=data.get('password')
+            )
             
-            # if duplicate_username.exists():
-            #     return JsonResponse({"error": "User with this username already exists"}, status=409, safe=False)
             
-            # if contact_duplicate:
-            #     return JsonResponse({"error": "User with this contact number already exists"}, status=409, safe=False)
-
-            user = User(name=data.get('name'),username=data.get('username'),role_id=data.get('role_id'),contact=data.get('contact'),client_id=data.get('client_id'))
-            user.save()
             serialized_data = user.user_serializer()
             return JsonResponse({'message': 'User created successfully', 'data': serialized_data}, status=201, safe=False)
-
+        except Roles.DoesNotExist:
+            return JsonResponse({'error': "Role does not exist"}, status=400)
+        except Client.DoesNotExist:
+            return JsonResponse({'error': "Client does not exist"}, status=400)
         except IntegrityError as e:
             if "Duplicate entry" in str(e):
                 return JsonResponse({'error': "User already exists"}, status=409)
@@ -86,29 +99,28 @@ class UserView(View):
                 return JsonResponse({'error': str(e)}, status=500)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-    
+        
     def get(self, request):
-        """
-            Fetch information of a user from database, based on user_id.
+        user_id = request.GET.get('id')
+        cache_key = f'user_data_{user_id}'
 
-            Args:
-                request: HttpRequest's object contains id of a user.
-            
-            Returns: JsonResponse: returns information of a user in the JSON format.
-        """
-        data = json.loads(request.body)
-        user_id = data.get('id')
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            response_data = cached_data
+            response_data['message'] = 'Data retrieved from cache'
+            return JsonResponse(response_data, status=200)
+
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
         
-        serialized_data = user.user_serializer() 
-        return JsonResponse(serialized_data,status=200)
-    
-
+        serialized_data = user.user_serializer()
+        cache.set(cache_key, serialized_data, timeout=300)
+        return JsonResponse(serialized_data, status=200)
+        
     def delete(self, request):
-
+        
         """
             Delete a user from database based on user_id.
 
@@ -129,8 +141,8 @@ class UserView(View):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
-
-class Users(View):
+        
+class Users(APIView):
     """
       A view class handles operations related to more than one user.like get information of all users related to a client.
 
@@ -138,6 +150,8 @@ class Users(View):
         get(self,request): get information of all users of a client
 
     """
+
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         """
             Fetch all users of a client based on client_id .if client exist in database
@@ -148,15 +162,17 @@ class Users(View):
             Return: information of all user of a client in the JSON format or error if client is invalid.
                 
         """
-        print("inside function",request.body)
-        data = json.loads(request.body)
+        data = request.GET
         client_id = data.get('client_id')
+
         if not Client.objects.filter(id=client_id):
             return JsonResponse({"error": "There is no such client"}, status=409, safe=False)
         try:
             users = User.objects.filter(client_id=client_id)
-            serialized_data = [user.user_serializer() for user in users]
-            return JsonResponse(serialized_data, safe=False)
+            paginator = CustomPagination()
+            paginated_users = paginator.paginate_queryset(users, request)
+            serialized_data = [user.user_serializer() for user in paginated_users]
+
+            return paginator.get_paginated_response(serialized_data)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-        

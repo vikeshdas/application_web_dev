@@ -3,6 +3,8 @@
 """
 
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
 
 class Roles(models.Model):
     """
@@ -65,46 +67,93 @@ class Client(models.Model):
                 'email': self.email,
             }
 
-class User(models.Model):
-    """
-        User model to create table in database and stores user's information and role associated with each user.
-
-        Attributes:
-            id: it is generated automatically .It uniquely identifies each user in database table.
-            name: name of the client.
-            username : it is unique for each user ,We require username when login to the application.
-            role:  each user will have role ,for example a user can access applicaiton using web or mobile or both.
-            contact :phone number of a user so that we can contact when we need.
-            client: each user will be belonging to a particular client.
-            updated_at: last updated date of user information in database table.
-            created_date: Date of current user creation in database table.
+class UserManager(BaseUserManager):
+    def create_user(self, first_name, last_name, username, email, role, phone, client, password):
+        """
+        Create and return a regular user with an email, username, and password.
+        """
+        if not email:
+            raise ValueError("Email field cannot be empty")
+        if not username:
+            raise ValueError("Username is required")
         
-        Method:
-            user_serializer(): returns dictionary of user information with key-value pair.
+        email = self.normalize_email(email)
+        user = self.model(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            email=email,
+            role=role,
+            phone=phone,
+            client=client
+        )
+        
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
-    """
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    def create_superuser(self, first_name, last_name, username, email, role, phone, client, password):
+        """
+        Create and return a superuser with an email, username, and password.
+        """
+        user = self.create_user(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            email=email,
+            role=role,
+            phone=phone,
+            client=client,
+        )
+        user.set_password(password)
+        user.is_admin = True
+        user.is_staff = True
+        user.is_superadmin = True
+        user.save(using=self._db)
+        return user
+
+class User(AbstractBaseUser):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     username = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(max_length=100, unique=True)
     role = models.ForeignKey(Roles, on_delete=models.CASCADE)
-    contact = models.CharField(max_length=20)
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def user_serializer(self):
-        role_data = self.role.id  if self.role else None
-        client_id = self.client.id if self.client else None
+    phone = models.CharField(max_length=20, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    date_joined = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    is_admin = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_superadmin = models.BooleanField(default=False)
 
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'role']
+
+    objects = UserManager()
+
+    def has_perm(self, perm, obj=None):
+        return self.is_admin
+
+    def has_module_perms(self, app_label):
+        return True
+
+    def user_serializer(self):
         return {
             'id': self.id,
-            'name': self.name,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
             'username': self.username,
-            'role_id': role_data,
-            'contact': self.contact,
-            'client_id': client_id,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at,
+            'email': self.email,
+            'role': self.role.id if self.role else None,
+            'phone': self.phone,
+            'client': self.client.id if self.client else None,
+            'date_joined': self.date_joined,
+            'updated_date': self.updated_date,
+            'is_admin': self.is_admin,
+            'is_staff': self.is_staff,
+            'is_active': self.is_active,
+            'is_superadmin': self.is_superadmin,
         }
 
 

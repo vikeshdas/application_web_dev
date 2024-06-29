@@ -2,9 +2,18 @@ from timbba.models import User,Client,Consignment
 from django.views import View 
 import json
 from django.http import JsonResponse
+from rest_framework.permissions import IsAuthenticated
+from django.core.cache import cache
+from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
 
-class ConsignmentView(View):
+class CustomPagination(PageNumberPagination):
+    page_size = 2
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class ConsignmentView(APIView):
     """
         View for handling consignment related operations.Consignment is a excel file that 
         contains information of logs with its dimensions and vehicle number in which these 
@@ -12,6 +21,8 @@ class ConsignmentView(View):
         class helps to insert consignment information in the database.
 
     """
+    permission_classes = [IsAuthenticated]
+
     def put(self, request):
         """
             Create a new consignment. Add information of consignment like vehicle number,consignment name,
@@ -55,17 +66,27 @@ class ConsignmentView(View):
             Returns:
                 JsonResponse: Details of a consignment.if Id not found in database return a error message.
         """
-        data = json.loads(request.body)
-        cons_id = data.get('con_id')
+        cons_id = request.GET.get('con_id')
+        cache_key = f'consignment_data_{cons_id}'
+
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            response_data = cached_data
+            response_data['message'] = 'Data retrieved from cache'
+            return JsonResponse(response_data, status=200)
+        
+        # data = json.loads(request.body)
+        # cons_id = data.get('con_id')
         try:
             consignment = Consignment.objects.get(id=cons_id)
         except Consignment.DoesNotExist:
             return JsonResponse({'error': 'Consignment with this id not found'}, status=404)
         
         serialized_data = consignment.con_serializer() 
+        cache.set(cache_key, serialized_data, timeout=300)
         return JsonResponse(serialized_data,status=201)
     
-class Consignments(View):
+class Consignments(APIView):
     """
         Handles operations related to more than one consignment.
         like fetching all consignments information related of a client.
@@ -73,6 +94,8 @@ class Consignments(View):
         Method:
             get(self,request): Fetch all consignments of a particular client.
     """
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request):
         """
             Retrieve information of all consignments of a particular client.
@@ -83,13 +106,26 @@ class Consignments(View):
             Returns:
                 JsonResponse: returns list of consignments of a particular client in JSON format. 
         """
-        data = json.loads(request.body)
-        client_id = data.get('client_id')
+        client_id = request.GET.get('client_id')
+        cache_key = f'consignments_data_{client_id}'
+
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            response_data = cached_data
+            response_data['message'] = 'Data retrieved from cache'
+            return JsonResponse(response_data, status=200)
+
         try:
             client_exist=Client.objects.get(id=client_id)
         except Exception as e:
             return JsonResponse({'error': 'Client not found with this id'}, status=404)
-    
-        consignments = Consignment.objects.filter(client_id=client_id)
-        serialized_data = [cons.con_serializer() for cons in consignments]
-        return JsonResponse({"consignments":serialized_data}, status=200)
+
+        try:
+            consignments = Consignment.objects.filter(client_id=client_id)
+            paginator = CustomPagination()
+            paginated_consignment = paginator.paginate_queryset(consignments, request)
+
+            serialized_data = [cons.con_serializer() for cons in paginated_consignment]
+            return paginator.get_paginated_response(serialized_data)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)

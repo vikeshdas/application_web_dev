@@ -4,14 +4,17 @@ import json
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
 from datetime import datetime
-   
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
-class ClientView(View):
+class ClientView(APIView):
     """
         A view for handling client related operation like creating a new client.
         A client is a admin who buys subscription for our application or we can 
         say that client is a owner of a factory who makes logs to plyboard.
     """
+    permission_classes = [IsAuthenticated]
+
     def put(self, request):
         """
             Create a new client.This function will be required when a client buys subscription.
@@ -27,12 +30,12 @@ class ClientView(View):
 
         try:
             duplicate_client=Client.objects.filter(contact=data.get('contact'))
-            # if duplicate_client:
-            #     return JsonResponse({'error': "Client already exists"}, status=400)
+            if duplicate_client:
+                return JsonResponse({'error': "Client already exists"}, status=400)
             client = Client(name=data.get('name'),address=data.get('address'),contact=data.get('contact'),updated_at=datetime.now(),created_at=datetime.now(),email=data.get('email'))
             client.save()
             serialized_data = client.client_serializer()
-            return JsonResponse({'message': 'User created successfully', 'data': serialized_data}, status=201, safe=False)
+            return JsonResponse({'message': 'Client created successfully', 'data': serialized_data}, status=201, safe=False)
 
         except IntegrityError as e:
             if "Duplicate entry" in str(e):

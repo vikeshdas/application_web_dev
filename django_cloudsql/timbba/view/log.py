@@ -1,14 +1,22 @@
 from timbba.models import Consignment,Item
-from django.views import View 
+from rest_framework.pagination import PageNumberPagination
 import json
 from django.http import JsonResponse
+from rest_framework.permissions import IsAuthenticated
+from django.core.cache import cache
+from rest_framework.views import APIView
 
+class CustomPagination(PageNumberPagination):
+    page_size = 2
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
+class Log(APIView):
 
-class Log(View):
     """
         Handling log related operations like inserting log information(create log),fetch information of a log.
     """
+    permission_classes = [IsAuthenticated]
     def put(self, request):
         """
             Insert information of a new log in database.
@@ -27,9 +35,8 @@ class Log(View):
             return JsonResponse({'error':'Consignment with this id does not exist'}, status=404)
         
         duplicate_log=Item.objects.filter(barcode=data.get('barcode'))
-        print("duplicate_log",duplicate_log)
-        # if duplicate_log.exists():
-        #     return JsonResponse({'error':'Log with this barcode allredy exist'}, status=404)
+        if duplicate_log.exists():
+            return JsonResponse({'error':'Log with this barcode allredy exist'}, status=404)
 
         try:
             consignmentObj=Consignment.objects.get(id=data.get("con_id"))
@@ -50,23 +57,32 @@ class Log(View):
 
             Response(HttpResponse):Return information of a log in the JSON format or error.
         """
-        data = json.loads(request.body)
-        log_id = data.get('id')
+        log_id = request.GET.get('id')
+        cache_key = f'log_data_{log_id}'
+
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            response_data = cached_data
+            response_data['message'] = 'Data retrieved from cache'
+            return JsonResponse(response_data, status=200)
+
         try:
             log = Item.objects.get(id=log_id)
             serializer_data = log.log_serializer()
+            cache.set(cache_key, serializer_data, timeout=300)
             return JsonResponse(serializer_data,status=201)
         except Item.DoesNotExist:
             return JsonResponse({'error': 'log with this id not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
-class Logs(View):
+class Logs(APIView):
     """
         View class to Handle operations related to more than one log for example
         get all logs of a consignment.
 
     """
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         """
             Get information of all logs related to a consignment.
@@ -77,15 +93,26 @@ class Logs(View):
             Response:
                 JsonResponse: return information of all logs related to a consignment in JSON format.
         """
-        data = json.loads(request.body)
-        consignment_id = data.get('con_id')
+        consignment_id = request.GET.get('con_id')
+        cache_key = f'logs_data_{consignment_id}'
+
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            response_data = cached_data
+            response_data['message'] = 'Data retrieved from cache'
+            return JsonResponse(response_data, status=200)
+        
         consignment_exist=Consignment.objects.filter(id=consignment_id)
         if not consignment_exist:
             return JsonResponse({'error':'Consignment with this id does not exist'}, status=404)
         try:
             logs = Item.objects.filter(consignment=consignment_id)
-            serialized_data = [log.log_serializer() for log in logs]
-            return JsonResponse(serialized_data, safe=False)
+            paginator = CustomPagination()
+            paginated_logs = paginator.paginate_queryset(logs, request)
+
+            serialized_data = [log.log_serializer() for log in paginated_logs]
+            cache.set(cache_key, serialized_data, timeout=300)
+            return paginator.get_paginated_response(serialized_data)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
         

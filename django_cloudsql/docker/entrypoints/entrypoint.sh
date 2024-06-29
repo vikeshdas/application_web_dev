@@ -11,5 +11,7 @@ wait_for_mysql
 
 python manage.py makemigrations timbba
 python manage.py migrate timbba
+python manage.py makemigrations sessions
+python manage.py migrate sessions
 
 exec "$@"

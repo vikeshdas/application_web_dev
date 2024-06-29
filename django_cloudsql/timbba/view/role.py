@@ -3,15 +3,18 @@ from django.views import View
 import json
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
- 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
+class RoleView(APIView):
 
-class RoleView(View):
     """
         View class to handle Role related operations like creating role. Role can be like mobile,web .mobile means user can 
         access information using only mobile,or web or both.
 
     """
+    permission_classes = [IsAuthenticated]
+
     def put(self, request):
         """
             Create new role.

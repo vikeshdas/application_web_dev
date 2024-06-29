@@ -2,8 +2,8 @@ services:
   backend_service:
     image: timbba_django
     container_name: backend_service
-    depends_on:
-      - cloud_sql_proxy
+    # depends_on:
+    #   - cloud_sql_proxy
     ports:
       - "8001:8001"
 
@@ -14,6 +14,11 @@ services:
         - "127.0.0.1:3307:3307"  
     volumes:
       - "C:/Users/vk001/vikesh/application_default_credentials.json:/application_default_credentials.json"
+
+  redis_service:
+    image: redis:latest
+    ports:
+      - "6379:6379"
 
   master_service:
       image: locust_image
