@@ -21,7 +21,6 @@ class HelloWorldUser(HttpUser):
         global created_user
         global created_client
         global user_names_list
-        client_id = created_client[random.randint(0, len(created_client)-1)]
         name=user_names_list[random.randint(0, 49)]
         response=self.client.put("http://172.23.0.3:8001/user/", json={"client_id":1,"name":name,"username":name+"_user","contact":713654795,"role_id":4,"address": "delhi"})
         if response.status_code == 200:                         

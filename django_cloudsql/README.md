@@ -20,3 +20,22 @@ class Roles(models.Model):
 - Then new_obj.save() ->this function will save above entry in Roles table.
 
 - So as you can see I created Database table , inserted data in table using object oriented.
+
+# Authentication
+Used token based authentication using rest_framework_simplejwt app of django rest framework.
+To impliment jwt authentiction of django rest framework we have to apply some configuration in 
+setting file of project.
+1. add rest_frameword_simplejwt to you INSTALLED_APP section of setting file
+2. add below section in you setting file at any where 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
+        ),
+        'DEFAULT_PERMISSION_CLASSES': (
+            'rest_framework.permissions.IsAuthenticated',
+        ),
+} 
+
+# Pagination
+# caching
+# Cloud SQL

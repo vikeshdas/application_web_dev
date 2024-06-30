@@ -2,8 +2,6 @@ services:
   backend_service:
     image: timbba_django
     container_name: backend_service
-    # depends_on:
-    #   - cloud_sql_proxy
     ports:
       - "8001:8001"
 
