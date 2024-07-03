@@ -20,7 +20,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
-logger = logging.getLogger(__name__)
 
 
 class LoginView(APIView):
@@ -54,8 +53,7 @@ class LoginView(APIView):
             )
 
         try:
-            user = User.objects.get(username=username)
-            logger.debug("FETCH USER: %s", user)
+            User.objects.get(username=username)
         except User.DoesNotExist:
             return JsonResponse({"error": "Invalid username"}, status=401)
 
