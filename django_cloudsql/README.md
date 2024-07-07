@@ -33,6 +33,7 @@ Let's say another class is the UserManager class, which contains two methods: cr
 To impliment jwt authentication of django rest framework we have to apply some configuration in setting file of project.
 1. add rest_framework_simplejwt to your INSTALLED_APP section of setting file
 2. add below section in you setting file at any where 
+```
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -41,7 +42,7 @@ REST_FRAMEWORK = {
             'rest_framework.permissions.IsAuthenticated',
         ),
 } 
-
+```
 3. To generate a token. Inside the login view, verify the user using the authenticate() method, which is located in django.contrib.auth, then call the login() method of the same module to set the user session. Then, generate the reference token using the for_user() method of the RefreshToken class, which is located in rest_framework_simplejwt.tokens.
 
     ```
