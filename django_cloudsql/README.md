@@ -23,7 +23,7 @@ class Roles(models.Model):
 
 # Authentication
 
-## I have custom user model in my project.
+## I have used custom user model in my project.
 
 To create a custom user model, you need to create two classes in models. Let's say one class is User, and it inherits the AbstractBaseUser class from django.contrib.auth.models. The User class should contain fields for the user table, such as firstname, lastname, etc , with some methods like has_perm() to check permissions, has_module_perm() to check the permission of a given app, and user serializer. The User class should also contain an object of the UserManager class.
 
