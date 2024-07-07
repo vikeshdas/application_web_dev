@@ -106,7 +106,7 @@ def get(self, request: HttpRequest) -> JsonResponse:
 "I have used Redis cache in this project. Cache is used to improve the performance of the application by reducing the access time of data. Cache stores frequently accessed data in memory, so next time a user accesses the same data, instead of hitting the database query, the data will be returned directly from the memory stored by the cache. Redis cache is an in-memory data structure that stores cached data in memory (RAM)
 
 ### steps to impliment redis cache in project 
-### step2: 
+### step1: 
 configure the cache in setting file of your project
 ```
 CACHES = {
@@ -121,7 +121,7 @@ CACHES = {
 }
 ```
 
-### step1: 
+### step2: 
  import the cache from django.core.cache import cache in your view. In the view, create a unique key to store cache data in memory, where the value will be the cached data. A user accesses the data from the database for the first time, and before returning the data, we create a unique key and store the accessed data with the key in Redis. Next time the user accesses the same data, we look for the same key in Redis; if it is available, we will return the data from Redis and do not need to hit the database query
 
 ```
