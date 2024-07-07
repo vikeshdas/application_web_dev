@@ -10,7 +10,6 @@ returns JWT tokens.
 
 """
 import json
-import logging
 
 from django.contrib.auth import authenticate, get_user_model, login
 from django.http import JsonResponse, HttpRequest
