@@ -100,14 +100,14 @@ def get(self, request: HttpRequest) -> JsonResponse:
     serialized_data = [user.user_serializer() for user in paginated_users]
 
     return paginator.get_paginated_response(serialized_data)
-
-```
+``` 
 # caching
 "I have used Redis cache in this project. Cache is used to improve the performance of the application by reducing the access time of data. Cache stores frequently accessed data in memory, so next time a user accesses the same data, instead of hitting the database query, the data will be returned directly from the memory stored by the cache. Redis cache is an in-memory data structure that stores cached data in memory (RAM)
 
 ### steps to impliment redis cache in project 
 ### step1: 
 configure the cache in setting file of your project
+
 ```
 CACHES = {
     'default': {
@@ -138,3 +138,34 @@ def get(self, request: HttpRequest) -> JsonResponse:
     cache.set(cache_key, serialized_data, timeout=300)
     return JsonResponse(serialized_data, status=200)
 ```
+## Serialization
+serialization in Django is the process of converting complex data types, such as
+querysets and model instances, into native Python data types that can then be 
+easily rendered into JSON, XML, or other content types.
+
+in this project i have used user-defined serializers to have more control over
+the serialization and deserialization process.
+
+below is one example in model .inside model defined serializer method to serialize
+data related to user.
+
+```
+def user_serializer(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "username": self.username,
+            "email": self.email,
+            "role": self.role.id if self.role else None,
+            "phone": self.phone,
+            "client": self.client.id if self.client else None,
+            "date_joined": self.date_joined,
+            "updated_date": self.updated_date,
+            "is_admin": self.is_admin,
+            "is_staff": self.is_staff,
+            "is_active": self.is_active,
+            "is_superadmin": self.is_superadmin,
+        }
+```
+
