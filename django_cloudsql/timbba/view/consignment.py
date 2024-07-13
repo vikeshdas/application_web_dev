@@ -1,7 +1,7 @@
 """
-    File contains view to handle operation releted to consignments
-    like insert new consignment,get information of consignment and 
-    get all logs of a consignment.
+File contains view to handle operations related to consignments
+like insert new consignment,get information of consignment and 
+get all logs of a consignment.
 """
 
 import json
@@ -18,7 +18,7 @@ class CustomPagination(PageNumberPagination):
     Custom pagination class that extends the PageNumberPagination
     provided by Django REST Framework.
 
-    This pagination class initialize some vlues for pagination:
+    This pagination class initialize some values for pagination:
     - Default page size of 2.
     - Allows clients to specify the page size via the 'page_size' query parameter.
     - Restricts the maximum page size that can be requested to 100.
@@ -42,7 +42,6 @@ class ConsignmentView(APIView):
     contains information of logs with its dimensions and vehicle number in which these
     logs comes to factory . Same excel file will be inserted in to database. So this
     class helps to insert consignment information in the database.
-
     """
 
     permission_classes = [IsAuthenticated]

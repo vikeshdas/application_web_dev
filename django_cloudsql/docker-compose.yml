@@ -4,6 +4,8 @@ services:
     container_name: backend_service
     ports:
       - "8001:8001"
+    volumes:
+      - "C:/Users/vk001/vikesh/application_default_credentials.json:/application_default_credentials.json"
 
   cloud_sql_proxy:
     image: cloud_sql_proxy

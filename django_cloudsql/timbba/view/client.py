@@ -1,5 +1,5 @@
 """
-    File contains view to handle operation  to create new client client
+    File contains view to handle operation  to create new  client
 """
 
 import json

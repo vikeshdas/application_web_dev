@@ -69,5 +69,4 @@ class LoginView(APIView):
                 },
                 status=200,
             )
-        
         return JsonResponse({"error": "Invalid password"}, status=401)

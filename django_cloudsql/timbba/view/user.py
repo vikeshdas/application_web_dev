@@ -47,8 +47,8 @@ class CustomPagination(PageNumberPagination):
 class UserView(APIView):
     """
     A View class to handle user related operations like creating
-    a new user,fetching information of a user ,
-    updating a user and delete a user.
+    a new user,fetching information of a user ,updating a user
+    and delete a user.
 
     """
 

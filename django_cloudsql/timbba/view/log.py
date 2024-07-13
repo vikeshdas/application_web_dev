@@ -1,6 +1,6 @@
 """
-    View to handle log releted operation like create log,
-    get information of a log and list logs of a consignment.
+View to handle log related operation like create log,
+get information of a log and list logs of a consignment.
 """
 
 import json
@@ -16,7 +16,7 @@ class CustomPagination(PageNumberPagination):
     """
     Custom pagination class that extends the PageNumberPagination provided by Django REST Framework.
 
-    This pagination class initialize some vlues for pagination:
+    This pagination class initializes some values for pagination:
     - Default page size of 2.
     - Allows clients to specify the page size via the 'page_size' query parameter.
     - Restricts the maximum page size that can be requested to 100.
