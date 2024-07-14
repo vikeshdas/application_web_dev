@@ -12,7 +12,7 @@ SECRET_KEY = 'django-insecure-8l71agy%r4_iw_*i$3b3%#x82s+&_rnmvovela5e4)giakkpd1
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.24.0.3','127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 secret_manager = SecretManager(project_id="547301894865", secret_id="timbba_db_password")
 secrete_values = secret_manager.get_secret()
