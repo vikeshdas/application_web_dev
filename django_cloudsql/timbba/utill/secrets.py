@@ -23,7 +23,7 @@ class SecretManager:
         returns:
             dictionary:function return dictionary which contains database password,database name,database user.
         """
-        assert os.getenv("GOOGLE_APPLICATION_CREDENTIALS"), "GOOGLE_APPLICATION_CREDENTIALS environment variable not set"
+        # assert os.getenv("GOOGLE_APPLICATION_CREDENTIALS"), "GOOGLE_APPLICATION_CREDENTIALS environment variable not set"
 
         secret_name = f"projects/{self.project_id}/secrets/{self.secret_id}/versions/latest"
 
