@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'timbba',
+    # 'timbba',
+    'timbba.apps.TimbbaConfig',
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -66,7 +67,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': secrete_values.get('db_name'),
-        'HOST': 'cloud_sql_proxy',
+        'HOST': '/cloudsql/gcloud-hands-on-417608:us-central1:vikesh-timbba-db',
         'USER': secrete_values.get('user'),
         'PASSWORD': secrete_values.get('db_password'),
         'PORT': '3307',
@@ -124,16 +125,16 @@ REST_FRAMEWORK = {
         ),
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis_service:6379/2',
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-            'MAX_MEMORY_POLICY': 'volatile-lru',
-        },
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://redis_service:6379/2',
+#         'OPTIONS': {
+#             'MAX_ENTRIES': 1000,
+#             'MAX_MEMORY_POLICY': 'volatile-lru',
+#         },
+#     }
+# }
 LOGIN_URL = 'login/'
 
 AUTH_USER_MODEL = 'timbba.User'
