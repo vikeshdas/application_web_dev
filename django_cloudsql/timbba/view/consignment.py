@@ -7,7 +7,7 @@ get all logs of a consignment.
 import json
 from timbba.models import User, Client, Consignment
 from django.http import JsonResponse,HttpRequest
-from django.core.cache import cache
+# from django.core.cache import cache
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
@@ -110,13 +110,13 @@ class ConsignmentView(APIView):
             database return a error message.
         """
         cons_id = request.GET.get("con_id")
-        cache_key = f"consignment_data_{cons_id}"
+        # cache_key = f"consignment_data_{cons_id}"
 
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            response_data = cached_data
-            response_data["message"] = "Data retrieved from cache"
-            return JsonResponse(response_data, status=200)
+        # cached_data = cache.get(cache_key)
+        # if cached_data:
+        #     response_data = cached_data
+        #     response_data["message"] = "Data retrieved from cache"
+        #     return JsonResponse(response_data, status=200)
 
         try:
             consignment = Consignment.objects.get(id=cons_id)
@@ -126,7 +126,7 @@ class ConsignmentView(APIView):
             )
 
         serialized_data = consignment.con_serializer()
-        cache.set(cache_key, serialized_data, timeout=300)
+        # cache.set(cache_key, serialized_data, timeout=300)
         return JsonResponse(serialized_data, status=201)
 
 
@@ -152,13 +152,13 @@ class Consignments(APIView):
             JsonResponse: returns list of consignments of a particular client in JSON format.
         """
         client_id = request.GET.get("client_id")
-        cache_key = f"consignments_data_{client_id}"
+        # cache_key = f"consignments_data_{client_id}"
 
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            response_data = cached_data
-            response_data["message"] = "Data retrieved from cache"
-            return JsonResponse(response_data, status=200)
+        # cached_data = cache.get(cache_key)
+        # if cached_data:
+        #     response_data = cached_data
+        #     response_data["message"] = "Data retrieved from cache"
+        #     return JsonResponse(response_data, status=200)
 
         try:
             Client.objects.get(id=client_id)

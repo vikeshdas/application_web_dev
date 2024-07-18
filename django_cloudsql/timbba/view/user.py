@@ -9,7 +9,7 @@ from timbba.models import Client, Roles
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpRequest
 from django.db.utils import IntegrityError
-from django.core.cache import cache
+# from django.core.cache import cache
 from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework.pagination import PageNumberPagination
@@ -150,13 +150,13 @@ class UserView(APIView):
         """
 
         user_id = request.GET.get("id")
-        cache_key = f"user_data_{user_id}"
+        # cache_key = f"user_data_{user_id}"
 
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            response_data = cached_data
-            response_data["message"] = "Data retrieved from cache"
-            return JsonResponse(response_data, status=200)
+        # cached_data = cache.get(cache_key)
+        # if cached_data:
+        #     response_data = cached_data
+        #     response_data["message"] = "Data retrieved from cache"
+        #     return JsonResponse(response_data, status=200)
 
         try:
             user = User.objects.get(id=user_id)
@@ -164,7 +164,7 @@ class UserView(APIView):
             return JsonResponse({"error": "User not found"}, status=404)
 
         serialized_data = user.user_serializer()
-        cache.set(cache_key, serialized_data, timeout=300)
+        # cache.set(cache_key, serialized_data, timeout=300)
         return JsonResponse(serialized_data, status=200)
 
     def delete(self, request: HttpRequest) -> JsonResponse:

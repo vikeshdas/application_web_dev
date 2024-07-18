@@ -8,7 +8,7 @@ from timbba.models import Consignment, Item
 from rest_framework.pagination import PageNumberPagination
 from django.http import JsonResponse, HttpRequest
 from rest_framework.permissions import IsAuthenticated
-from django.core.cache import cache
+# from django.core.cache import cache
 from rest_framework.views import APIView
 
 
@@ -92,18 +92,18 @@ class Log(APIView):
         Response(HttpResponse):Return information of a log in the JSON format or error.
         """
         log_id = request.GET.get("id")
-        cache_key = f"log_data_{log_id}"
+        # cache_key = f"log_data_{log_id}"
 
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            response_data = cached_data
-            response_data["message"] = "Data retrieved from cache"
-            return JsonResponse(response_data, status=200)
+        # cached_data = cache.get(cache_key)
+        # if cached_data:
+        #     response_data = cached_data
+        #     response_data["message"] = "Data retrieved from cache"
+        #     return JsonResponse(response_data, status=200)
 
         try:
             log = Item.objects.get(id=log_id)
             serializer_data = log.log_serializer()
-            cache.set(cache_key, serializer_data, timeout=300)
+            # cache.set(cache_key, serializer_data, timeout=300)
             return JsonResponse(serializer_data, status=201)
         except Item.DoesNotExist:
             return JsonResponse({"error": "log with this id not found"}, status=404)
@@ -131,13 +131,13 @@ class Logs(APIView):
             JsonResponse: return information of all logs related to a consignment in JSON format.
         """
         consignment_id = request.GET.get("con_id")
-        cache_key = f"logs_data_{consignment_id}"
+        # cache_key = f"logs_data_{consignment_id}"
 
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            response_data = cached_data
-            response_data["message"] = "Data retrieved from cache"
-            return JsonResponse(response_data, status=200)
+        # cached_data = cache.get(cache_key)
+        # if cached_data:
+        #     response_data = cached_data
+        #     response_data["message"] = "Data retrieved from cache"
+        #     return JsonResponse(response_data, status=200)
 
         consignment_exist = Consignment.objects.filter(id=consignment_id)
         if not consignment_exist:
@@ -150,7 +150,7 @@ class Logs(APIView):
             paginated_logs = paginator.paginate_queryset(logs, request)
 
             serialized_data = [log.log_serializer() for log in paginated_logs]
-            cache.set(cache_key, serialized_data, timeout=300)
+            # cache.set(cache_key, serialized_data, timeout=300)
             return paginator.get_paginated_response(serialized_data)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
