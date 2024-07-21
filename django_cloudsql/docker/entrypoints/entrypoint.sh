@@ -13,5 +13,5 @@ python manage.py makemigrations timbba
 python manage.py migrate timbba
 python manage.py makemigrations sessions
 python manage.py migrate sessions
-
+exec gunicorn --bind 0.0.0.0:4200 timbba.wsgi:application
 exec "$@"
