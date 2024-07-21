@@ -7,11 +7,11 @@ wait_for_mysql() {
   done
 }
 
-wait_for_mysql
+# wait_for_mysql
 
 python manage.py makemigrations timbba
 python manage.py migrate timbba
 python manage.py makemigrations sessions
 python manage.py migrate sessions
-exec gunicorn --bind 0.0.0.0:4200 timbba.wsgi:application
+exec gunicorn --bind 0.0.0.0:8080 timbba.wsgi:application
 exec "$@"
